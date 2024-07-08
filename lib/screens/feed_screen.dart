@@ -26,21 +26,31 @@ class _FeedScreenState extends State<FeedScreen> {
           ? null
           : AppBar(
               backgroundColor: mobileBackgroundColor,
-              centerTitle: false,
-              title: SvgPicture.asset(
-                'assets/tiktok.svg',
-                color: primaryColor,
-                height: 32,
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.messenger_outline,
+              centerTitle: true, // Center the title content horizontally
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SvgPicture.asset(
+                    'assets/tiktok.svg',
                     color: primaryColor,
+                    height: 32,
                   ),
-                  onPressed: () {},
-                ),
-              ],
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'For You',
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Placeholder to balance the space taken by the messenger icon on the right
+                  SizedBox(width: 32), 
+                ],
+              )
             ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
