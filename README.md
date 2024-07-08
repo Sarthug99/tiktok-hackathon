@@ -1,48 +1,45 @@
-# Instagram Clone
+# TikTok Hackathon 2024
 
-A completely Responsive Instagram App- Works on Android, iOS & Web! 
+This app is built on [Rivaan Ranawat](https://github.com/RivaanRanawat/instagram-flutter-clone)
 
 ## Features
-- Responsive Instagram UI
-- Email & Password Authentication
-- Share Posts with Caption
-- Display Posts with Caption
-- Like & Comment on Posts
-- Search Users
-- Follow Users
-- Display User Posts, Followers & Following
-- EVERYTHING REAL TIME
-- Sign Out
+- Voice Control (Swipe Up, Swipe Down, Create a post)
+- Epileptic Sensitivity
+- Contrast Error Detection
 
-## YouTube
-I have created a tutorial based on this, do check it out on my channel [Rivaan Ranawat](https://youtu.be/BBccK1zTgxw) 
+We get a dialog box with Accessibility Report after creating a post. 
 
-<p align="center">
-  <img width="600" src="https://github.com/RivaanRanawat/instagram-flutter-clone/blob/master/screenshot.png" alt="Youtube Tutorial Image">
-</p>
+## Setup & Installation
+- Clone this repository.
+- Follow this to install and setup Flutter for Android development.
+- Create and setup Firebase Project
+- Setup DialogFlowAPI.
 
+### Firebase Setup
+- Enable Authentication.
+- Create collections in Firestore Database - posts, users, job_processing.
+- Enable Firebase Storage.
+- Make Firestore rules.
+- Create an android application.
+- Download the google-services.json and place it in android/app.
+- Copy the Web Firebase options into a .env created in the root.
 
-## Installation
-After cloning this repository, migrate to ```instagram-flutter-clone``` folder. Then, follow the following steps:
-- Create Firebase Project
-- Enable Authentication
-- Make Firestore Rules
-- Create Android, iOS & Web Apps
-- Take Web FirebaseOptions and put it in main function in main.dart file replacing my keys (My keys wont work as I deleted my project)
-Then run the following commands to run your app:
+### DialogFlow API Setup
+- Enable DialogFlow API in Google Cloud Platform.
+- Click on Create credentials and then create a service account to access this API.
+- Download the service account key json and copy it to /assets as service_account_key.json.
+- Create an agent on DialogFlow ES Console.
+- Create Intents - Swipe Up, Swipe Down and Add Post. (Give them appropriate training phrases)
+
+## Steps to run
+- Start a Virtual Device in Android Studio.
 ```bash
+  flutter clean
   flutter pub get
-  open -a simulator (to get iOS Simulator)
   flutter run
-  flutter run -d chrome --web-renderer html (to see the best output)
 ```
 
-## Tech Used
-**Server**: Firebase Auth, Firebase Storage, Firebase Firestore
-
-**Client**: Flutter, Provider
-    
-## Feedback
-
-If you have any feedback, please reach out to me at namanrivaan@gmail.com
+## Technology Used
+- Frontend -> Flutter
+- Backend -> Firebase
 
