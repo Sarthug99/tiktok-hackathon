@@ -1,0 +1,5 @@
+opencv-python-headless
+numpy
+easyocr
+imutils
+firebase-admin

@@ -1,0 +1,8 @@
+{
+    "builds": [
+      {"src": "epilepsy.py", "use": "@vercel/python"}
+    ],
+    "routes": [
+      {"src": "epilepsy.py", "dest": "epilepsy.py"}
+    ]
+  }
