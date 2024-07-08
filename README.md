@@ -31,15 +31,25 @@ We get a dialog box with Accessibility Report after creating a post.
 - Create an agent on DialogFlow ES Console.
 - Create Intents - Swipe Up, Swipe Down and Add Post. (Give them appropriate training phrases)
 
+### Accessibility Pipeline
+- Asynchronous processing of video/images for accessibility testing
+- constrast checking
+- epilepsy causing pattern detection
+- runs through job processing.
+
 ## Steps to run
 - Start a Virtual Device in Android Studio.
 ```bash
   flutter clean
   flutter pub get
   flutter run
+
+  cd fastapi
+  python worker.py
 ```
 
 ## Technology Used
 - Frontend -> Flutter
 - Backend -> Firebase
+- Backend -> Python
 
