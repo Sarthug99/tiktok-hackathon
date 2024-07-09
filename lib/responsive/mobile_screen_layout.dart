@@ -1,13 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone_flutter/utils/colors.dart';
-import 'package:instagram_clone_flutter/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+// Conditional imports for VoiceAssistant
+import 'package:instagram_clone_flutter/utils/voice_assistant_mobile.dart'
+    if (dart.library.html) 'package:instagram_clone_flutter/utils/voice_assistant_web.dart';
+
 import 'package:instagram_clone_flutter/screens/feed_screen.dart';
 import 'package:instagram_clone_flutter/screens/search_screen.dart';
 import 'package:instagram_clone_flutter/screens/add_post_screen.dart';
 import 'package:instagram_clone_flutter/screens/profile_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MobileScreenLayout extends StatefulWidget {
   const MobileScreenLayout({Key? key}) : super(key: key);
@@ -69,7 +73,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double bottomNavBarHeight = screenHeight * 0.06;
+    final double bottomNavBarHeight = screenHeight * 0.07;
 
     return Scaffold(
       body: PageView(
@@ -77,13 +81,13 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
         onPageChanged: onPageChanged,
         children: [
           const FeedScreen(),
-          const SearchScreen(),
+          const SearchScreen(), // This will be for the "Discover" tab
           const AddPostScreen(),
-          const Center(child: Text('Inbox')),
+          const Center(child: Text('Notifications Screen')), // This will be for the "Inbox" tab
           ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
         ],
       ),
-      bottomNavigationBar: SizedBox(
+      bottomNavigationBar: Container(
         height: bottomNavBarHeight,
         child: CupertinoTabBar(
           backgroundColor: mobileBackgroundColor,
@@ -137,7 +141,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           ],
           onTap: navigationTapped,
           currentIndex: _page,
-        )
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _toggleListening(context),

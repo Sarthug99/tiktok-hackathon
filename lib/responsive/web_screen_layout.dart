@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone_flutter/utils/colors.dart';
-import 'package:instagram_clone_flutter/utils/global_variable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+// Conditional imports for VoiceAssistant
+import 'package:instagram_clone_flutter/utils/voice_assistant_mobile.dart'
+    if (dart.library.html) 'package:instagram_clone_flutter/utils/voice_assistant_web.dart';
+
+import 'package:instagram_clone_flutter/screens/feed_screen.dart';
+import 'package:instagram_clone_flutter/screens/search_screen.dart';
+import 'package:instagram_clone_flutter/screens/add_post_screen.dart';
+import 'package:instagram_clone_flutter/screens/profile_screen.dart';
 
 class WebScreenLayout extends StatefulWidget {
   const WebScreenLayout({Key? key}) : super(key: key);
@@ -13,17 +23,27 @@ class WebScreenLayout extends StatefulWidget {
 class _WebScreenLayoutState extends State<WebScreenLayout> {
   int _page = 0;
   late PageController pageController; // for tabs animation
+  late VoiceAssistant voiceAssistant; // Instance of VoiceAssistant
+  bool _isListening = false; // State to track if listening
 
   @override
   void initState() {
     super.initState();
     pageController = PageController();
+    voiceAssistant = VoiceAssistant(
+      onListeningStateChanged: (isListening) {
+        setState(() {
+          _isListening = isListening;
+        });
+      },
+    ); // Initialize VoiceAssistant
   }
 
   @override
   void dispose() {
     super.dispose();
     pageController.dispose();
+    voiceAssistant.stopListening(); // Stop listening when disposed
   }
 
   void onPageChanged(int page) {
@@ -33,10 +53,20 @@ class _WebScreenLayoutState extends State<WebScreenLayout> {
   }
 
   void navigationTapped(int page) {
-    //Animating Page
     pageController.jumpToPage(page);
     setState(() {
       _page = page;
+    });
+  }
+
+  void _toggleListening(BuildContext context) {
+    if (_isListening) {
+      voiceAssistant.stopListening();
+    } else {
+      voiceAssistant.startListening(context); // Pass context here
+    }
+    setState(() {
+      _isListening = !_isListening;
     });
   }
 
@@ -93,7 +123,17 @@ class _WebScreenLayoutState extends State<WebScreenLayout> {
         physics: const NeverScrollableScrollPhysics(),
         controller: pageController,
         onPageChanged: onPageChanged,
-        children: homeScreenItems,
+        children: [
+          const FeedScreen(),
+          const SearchScreen(),
+          const AddPostScreen(),
+          const Center(child: Text('Notifications Screen')),
+          ProfileScreen(uid: FirebaseAuth.instance.currentUser!.uid),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _toggleListening(context),
+        child: Icon(_isListening ? Icons.mic_off : Icons.mic),
       ),
     );
   }
