@@ -34,7 +34,6 @@
 .env
 
 # Web related
-lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
@@ -49,3 +48,4 @@ app.*.map.json
 /assets/service_account_key.json
 /android/app/google-services.json
 /ios/Runner/GoogleService-Info.plist
+.vercel
