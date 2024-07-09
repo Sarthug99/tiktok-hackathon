@@ -1,6 +1,5 @@
 # TikTok Hackathon 2024
 
-This app is built on [Rivaan Ranawat](https://github.com/RivaanRanawat/instagram-flutter-clone)
 
 ## Features
 - Voice Control (Swipe Up, Swipe Down, Create a post)
@@ -52,4 +51,8 @@ We get a dialog box with Accessibility Report after creating a post.
 - Frontend -> Flutter
 - Backend -> Firebase
 - Backend -> Python
+
+This app is inspired by [Rivaan Ranawat](https://github.com/RivaanRanawat/instagram-flutter-clone) 's opensource app
+
+
 
