@@ -8,10 +8,8 @@ import 'package:instagram_clone_flutter/utils/colors.dart';
 import 'package:instagram_clone_flutter/utils/global_variable.dart';
 import 'package:instagram_clone_flutter/utils/utils.dart';
 import 'package:instagram_clone_flutter/widgets/like_animation.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-import 'full_screen_video.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class PostCard extends StatefulWidget {
@@ -30,6 +28,7 @@ class _PostCardState extends State<PostCard> {
   bool isLikeAnimating = false;
   VideoPlayerController? _videoPlayerController;
   bool isVideoInitialized = false;
+  bool isMuted = true;
 
   @override
   void initState() {
@@ -40,6 +39,7 @@ class _PostCardState extends State<PostCard> {
         ..initialize().then((_) {
           setState(() {
             isVideoInitialized = true;
+            _videoPlayerController?.setVolume(0); // Start muted
           });
         });
     }
@@ -85,10 +85,36 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
+  void _toggleMute() {
+    if (_videoPlayerController != null && isVideoInitialized) {
+      setState(() {
+        isMuted = !isMuted;
+        _videoPlayerController!.setVolume(isMuted ? 0 : 1);
+      });
+    }
+  }
+
+  void likePost() {
+    final model.User user = Provider.of<UserProvider>(context, listen: false).getUser;
+    FireStoreMethods().likePost(
+      widget.snap['postId'].toString(),
+      user.uid,
+      widget.snap['likes'],
+    );
+    setState(() {
+      isLikeAnimating = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final model.User user = Provider.of<UserProvider>(context).getUser;
     final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    print("------------------------ screen height: $height, $width");
+    final leftBarHeight = height * 0.072;
+    final rightBarHeight = height * 0.1335;
+    final barWidth = width * 0.0446;
 
     return VisibilityDetector(
       key: Key(widget.snap['postId']),
@@ -100,257 +126,105 @@ class _PostCardState extends State<PostCard> {
         }
       },
       child: Container(
-        // boundary needed for web
+        height: height - kBottomNavigationBarHeight - kToolbarHeight, // Adjust height
+        width: double.infinity,
         decoration: BoxDecoration(
           border: Border.all(
             color: width > webScreenSize ? secondaryColor : mobileBackgroundColor,
           ),
           color: mobileBackgroundColor,
         ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 10,
-        ),
-        child: Column(
+        child: Stack(
           children: [
-            // HEADER SECTION OF THE POST
+            // VIDEO OR IMAGE SECTION
             Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 4,
-                horizontal: 16,
-              ).copyWith(right: 0),
-              child: Row(
-                children: <Widget>[
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundImage: NetworkImage(
-                      widget.snap['profImage'].toString(),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: 8,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            widget.snap['username'].toString(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  widget.snap['uid'].toString() == user.uid
-                      ? IconButton(
-                          onPressed: () {
-                            showDialog(
-                              useRootNavigator: false,
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  child: ListView(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 16),
-                                      shrinkWrap: true,
-                                      children: [
-                                        'Delete',
-                                      ]
-                                          .map(
-                                            (e) => InkWell(
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                          vertical: 12,
-                                                          horizontal: 16),
-                                                  child: Text(e),
-                                                ),
-                                                onTap: () {
-                                                  deletePost(
-                                                    widget.snap['postId']
-                                                        .toString(),
-                                                  );
-                                                  // remove the dialog box
-                                                  Navigator.of(context).pop();
-                                                }),
-                                          )
-                                          .toList()),
-                                );
-                              },
-                            );
-                          },
-                          icon: const Icon(Icons.more_vert),
+              width: double.infinity,
+              color: Colors.black,
+              child: widget.snap['isVideo'] == true
+                  ? _videoPlayerController != null && _videoPlayerController!.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: _videoPlayerController!.value.aspectRatio,
+                          child: VideoPlayer(_videoPlayerController!),
                         )
-                      : Container(),
-                ],
-              ),
+                      : const Center(child: CircularProgressIndicator())
+                  : Image.network(
+                      widget.snap['postUrl'].toString(),
+                      fit: BoxFit.cover,
+                    ),
             ),
-            // IMAGE OR VIDEO SECTION OF THE POST
-            GestureDetector(
-              onDoubleTap: () {
-                FireStoreMethods().likePost(
-                  widget.snap['postId'].toString(),
-                  user.uid,
-                  widget.snap['likes'],
-                );
-                setState(() {
-                  isLikeAnimating = true;
-                });
-              },
-              onTap: widget.snap['isVideo'] == true
-                  ? () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => FullScreenVideo(
-                            videoUrl: widget.snap['postUrl'],
-                          ),
-                        ),
-                      );
-                    }
-                  : null,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.35,
-                    width: double.infinity,
-                    color: Colors.black,
-                    child: widget.snap['isVideo'] == true
-                        ? _videoPlayerController != null && _videoPlayerController!.value.isInitialized
-                            ? AspectRatio(
-                                aspectRatio: _videoPlayerController!.value.aspectRatio,
-                                child: VideoPlayer(_videoPlayerController!),
-                              )
-                            : const Center(child: CircularProgressIndicator())
-                        : Image.network(
-                            widget.snap['postUrl'].toString(),
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 200),
-                    opacity: isLikeAnimating ? 1 : 0,
-                    child: LikeAnimation(
-                      isAnimating: isLikeAnimating,
-                      duration: const Duration(
-                        milliseconds: 400,
-                      ),
-                      onEnd: () {
-                        setState(() {
-                          isLikeAnimating = false;
-                        });
-                      },
-                      child: const Icon(
-                        Icons.favorite,
-                        color: Colors.white,
-                        size: 100,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // LIKE, COMMENT SECTION OF THE POST
-            Row(
-              children: <Widget>[
-                LikeAnimation(
-                  isAnimating: widget.snap['likes'].contains(user.uid),
-                  smallLike: true,
-                  child: IconButton(
-                    icon: widget.snap['likes'].contains(user.uid)
-                        ? const Icon(
-                            Icons.favorite,
-                            color: Colors.red,
-                          )
-                        : const Icon(
-                            Icons.favorite_border,
-                          ),
-                    onPressed: () => FireStoreMethods().likePost(
-                      widget.snap['postId'].toString(),
-                      user.uid,
-                      widget.snap['likes'],
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.comment_outlined,
-                  ),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => CommentsScreen(
-                        postId: widget.snap['postId'].toString(),
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                    icon: const Icon(
-                      Icons.send,
-                    ),
-                    onPressed: () {}),
-                Expanded(
-                    child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: IconButton(
-                      icon: const Icon(Icons.bookmark_border), onPressed: () {}),
-                ))
-              ],
-            ),
-            //DESCRIPTION AND NUMBER OF COMMENTS
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            // AUTHOR NAME AND CAPTION SECTION
+            Positioned(
+              bottom: leftBarHeight,
+              left: barWidth,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  DefaultTextStyle(
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall!
-                          .copyWith(fontWeight: FontWeight.w800),
-                      child: Text(
-                        '${widget.snap['likes'].length} likes',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      )),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                    ),
-                    child: RichText(
-                      text: TextSpan(
-                        style: const TextStyle(color: primaryColor),
-                        children: [
-                          TextSpan(
-                            text: widget.snap['username'].toString(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                  Positioned(
+                            top: 0,
+                            right: 0,
+                            child: IconButton(
+                              icon: Icon(
+                                isMuted ? Icons.volume_off : Icons.volume_up,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              onPressed: _toggleMute,
                             ),
                           ),
-                          TextSpan(
-                            text: ' ${widget.snap['description']}',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(
-                        'View all $commentLen comments',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: secondaryColor,
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundImage: NetworkImage(
+                          widget.snap['profImage'].toString(),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.snap['username'].toString(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.snap['description'],
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            // LIKE, COMMENT, AND SHARE ICONS SECTION
+            Positioned(
+              right: barWidth,
+              bottom: rightBarHeight,
+              child: Column(
+                children: <Widget>[
+                  LikeAnimation(
+                    isAnimating: widget.snap['likes'].contains(user.uid),
+                    smallLike: true,
+                    child: IconButton(
+                      icon: widget.snap['likes'].contains(user.uid)
+                          ? const Icon(
+                              Icons.favorite,
+                              color: Colors.red,
+                            )
+                          : const Icon(
+                              Icons.favorite_border,
+                            ),
+                      onPressed: () => likePost(),
                     ),
-                    onTap: () => Navigator.of(context).push(
+                  ),
+                  const SizedBox(height: 8),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.comment_outlined,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => CommentsScreen(
                           postId: widget.snap['postId'].toString(),
@@ -358,19 +232,38 @@ class _PostCardState extends State<PostCard> {
                       ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      DateFormat.yMMMd()
-                          .format(widget.snap['datePublished'].toDate()),
-                      style: const TextStyle(
-                        color: secondaryColor,
-                      ),
+                  const SizedBox(height: 8),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.share,
+                      color: Colors.white,
                     ),
+                    onPressed: () {},
                   ),
                 ],
               ),
-            )
+            ),
+            // LIKE ANIMATION
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: isLikeAnimating ? 1 : 0,
+              child: LikeAnimation(
+                isAnimating: isLikeAnimating,
+                duration: const Duration(
+                  milliseconds: 400,
+                ),
+                onEnd: () {
+                  setState(() {
+                    isLikeAnimating = false;
+                  });
+                },
+                child: const Icon(
+                  Icons.favorite,
+                  color: Colors.white,
+                  size: 100,
+                ),
+              ),
+            ),
           ],
         ),
       ),

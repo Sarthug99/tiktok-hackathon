@@ -5,20 +5,20 @@ import 'package:instagram_clone_flutter/screens/add_post_screen.dart';
 
 class Actions {
   static void swipeUp(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height * 0.35 + 20; // Height of one post + padding
+    final double height = MediaQuery.of(context).size.height - MediaQuery.of(context).size.height * 0.1027; // Height of one post + padding
     FeedScreen.scrollController.animateTo(
       FeedScreen.scrollController.offset + height,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
     print("Swiping up");
   }
 
   static void swipeDown(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height * 0.35 + 20; // Height of one post + padding
+    final double height = MediaQuery.of(context).size.height - MediaQuery.of(context).size.height * 0.1027; // Height of one post + padding
     FeedScreen.scrollController.animateTo(
       FeedScreen.scrollController.offset - height,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
     print("Swiping down");

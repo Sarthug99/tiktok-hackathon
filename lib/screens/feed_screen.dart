@@ -18,6 +18,8 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double appBarHeight = screenHeight * 0.05;
 
     return Scaffold(
       backgroundColor:
@@ -25,6 +27,7 @@ class _FeedScreenState extends State<FeedScreen> {
       appBar: width > webScreenSize
           ? null
           : AppBar(
+              toolbarHeight: appBarHeight,
               backgroundColor: mobileBackgroundColor,
               centerTitle: true, // Center the title content horizontally
               title: Row(
@@ -67,15 +70,22 @@ class _FeedScreenState extends State<FeedScreen> {
           return ListView.builder(
             controller: FeedScreen.scrollController,
             itemCount: snapshot.data!.docs.length,
-            itemBuilder: (ctx, index) => Container(
-              margin: EdgeInsets.symmetric(
-                horizontal: width > webScreenSize ? width * 0.3 : 0,
-                vertical: width > webScreenSize ? 15 : 0,
-              ),
-              child: PostCard(
-                snap: snapshot.data!.docs[index].data(),
-              ),
-            ),
+            itemBuilder: (ctx, index) { 
+              final postHeight = MediaQuery.of(context).size.height - kBottomNavigationBarHeight - kToolbarHeight;
+
+              return Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: width > webScreenSize ? width * 0.3 : 0,
+                  vertical: width > webScreenSize ? 15 : 0,
+                ),
+                child: SizedBox(
+                  height: postHeight,
+                  child: PostCard(
+                    snap: snapshot.data!.docs[index].data(),
+                  ),
+                ),
+              );
+            }
           );
         },
       ),
